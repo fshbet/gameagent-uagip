@@ -9,6 +9,21 @@ from typing import Any, Dict, Optional, Union
 from pathlib import Path
 
 
+class ConfigError(Exception):
+    """Base exception for configuration errors."""
+    pass
+
+
+class ConfigLoadError(ConfigError):
+    """Custom exception for configuration loading errors."""
+    pass
+
+
+class ConfigValidationError(ConfigError):
+    """Custom exception for configuration validation errors."""
+    pass
+
+
 class ConfigManager:
     """
     A configuration manager that loads YAML files and allows environment variable overrides.
@@ -25,14 +40,25 @@ class ConfigManager:
         self._config_data: Dict[str, Any] = {}
         self.load_config()
 
+
     def load_config(self) -> None:
         """
         Load configuration from YAML file and apply environment variable overrides.
         """
         # Load base configuration from YAML file
-        if os.path.exists(self.config_file):
-            with open(self.config_file, 'r') as file:
-                self._config_data = yaml.safe_load(file) or {}
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r') as file:
+                    self._config_data = yaml.safe_load(file) or {}
+            else:
+                # If file doesn't exist, initialize empty config
+                self._config_data = {}
+        except yaml.YAMLError as e:
+            raise ConfigLoadError(f"Invalid YAML in config file '{self.config_file}': {str(e)}")
+        except PermissionError:
+            raise ConfigLoadError(f"Permission denied reading config file '{self.config_file}'")
+        except Exception as e:
+            raise ConfigLoadError(f"Error reading config file '{self.config_file}': {str(e)}")
         
         # Apply environment variable overrides
         self._apply_env_overrides()

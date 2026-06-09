@@ -11,7 +11,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'core'))
 
-from config.config_manager import ConfigManager
+from config.config_manager import ConfigManager, ConfigLoadError
 
 
 class TestConfigManager(unittest.TestCase):
