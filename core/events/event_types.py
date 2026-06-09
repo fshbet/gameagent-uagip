@@ -41,6 +41,13 @@ class EventType:
     PLUGIN_LOADED = "plugin.loaded"
     PLUGIN_UNLOADED = "plugin.unloaded"
     
+    # Job events
+    JOB_CREATED = "job.created"
+    JOB_STARTED = "job.started"
+    JOB_COMPLETED = "job.completed"
+    JOB_FAILED = "job.failed"
+    JOB_CANCELLED = "job.cancelled"
+    
     # All standard event types
     ALL_STANDARD_TYPES: Set[str] = {
         SYSTEM_STARTUP,
@@ -55,7 +62,12 @@ class EventType:
         LEARNING_UPDATE,
         VIDEO_CREATED,
         PLUGIN_LOADED,
-        PLUGIN_UNLOADED
+        PLUGIN_UNLOADED,
+        JOB_CREATED,
+        JOB_STARTED,
+        JOB_COMPLETED,
+        JOB_FAILED,
+        JOB_CANCELLED
     }
     
     @classmethod
