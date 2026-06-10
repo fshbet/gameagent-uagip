@@ -10,23 +10,25 @@ from core.health.health_status import HealthStatus
 from core.events.event_bus import EventBus
 
 
-class TestHealthCheck(SyncHealthCheck):
-    """Test health check implementation."""
+def create_test_health_check(component_id: str, component_name: str, status: HealthStatus = HealthStatus.HEALTHY):
+    """Factory function to create test health checks to avoid pytest collection issues."""
+    class _TestHealthCheck(SyncHealthCheck):
+        def __init__(self, component_id: str, component_name: str, status: HealthStatus = HealthStatus.HEALTHY):
+            super().__init__(component_id, component_name)
+            self._status = status
+        
+        async def run_check(self) -> ComponentHealth:
+            return ComponentHealth(
+                component_id=self.component_id,
+                component_name=self.component_name,
+                status=self._status,
+                message=f"Test check for {self.component_name}"
+            )
+        
+        def is_async(self) -> bool:
+            return False
     
-    def __init__(self, component_id: str, component_name: str, status: HealthStatus = HealthStatus.HEALTHY):
-        super().__init__(component_id, component_name)
-        self._status = status
-    
-    async def run_check(self) -> ComponentHealth:
-        return ComponentHealth(
-            component_id=self.component_id,
-            component_name=self.component_name,
-            status=self._status,
-            message=f"Test check for {self.component_name}"
-        )
-    
-    def is_async(self) -> bool:
-        return False
+    return _TestHealthCheck(component_id, component_name, status)
 
 
 class TestHealthMonitor(unittest.TestCase):
@@ -39,7 +41,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_register_check(self):
         """Test registering a health check."""
-        check = TestHealthCheck("test_id", "Test Component")
+        check = create_test_health_check("test_id", "Test Component")
         self.health_monitor.register_check(check)
         
         self.assertIn("test_id", self.health_monitor._checks)
@@ -47,7 +49,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_remove_check(self):
         """Test removing a health check."""
-        check = TestHealthCheck("test_id", "Test Component")
+        check = create_test_health_check("test_id", "Test Component")
         self.health_monitor.register_check(check)
         
         # Should return True when removed
@@ -66,7 +68,7 @@ class TestHealthMonitor(unittest.TestCase):
         self.assertEqual(status, HealthStatus.UNKNOWN)
         
         # Add a healthy component
-        check = TestHealthCheck("test_id", "Test Component", HealthStatus.HEALTHY)
+        check = create_test_health_check("test_id", "Test Component", HealthStatus.HEALTHY)
         self.health_monitor.register_check(check)
         self.health_monitor._component_health["test_id"] = ComponentHealth(
             component_id="test_id",
@@ -79,7 +81,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_get_component_health(self):
         """Test getting component health."""
-        check = TestHealthCheck("test_id", "Test Component")
+        check = create_test_health_check("test_id", "Test Component")
         self.health_monitor.register_check(check)
         
         # Add component health
@@ -151,7 +153,7 @@ class TestHealthMonitor(unittest.TestCase):
     def test_run_all_checks(self, mock_gather):
         """Test running all checks."""
         # Set up a check
-        check = TestHealthCheck("test_id", "Test Component")
+        check = create_test_health_check("test_id", "Test Component")
         self.health_monitor.register_check(check)
         
         # Mock the gather function to return successful results
