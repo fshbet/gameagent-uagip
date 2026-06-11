@@ -41,12 +41,19 @@ class EventType:
     PLUGIN_LOADED = "plugin.loaded"
     PLUGIN_UNLOADED = "plugin.unloaded"
     
-    # Job events
+     # Job events
     JOB_CREATED = "job.created"
     JOB_STARTED = "job.started"
     JOB_COMPLETED = "job.completed"
     JOB_FAILED = "job.failed"
     JOB_CANCELLED = "job.cancelled"
+     
+    # ADB events
+    ADB_CONNECTED = "adb.connected"
+    ADB_DISCONNECTED = "adb.disconnected"
+    ADB_CAPTURED = "adb.captured"
+    ADB_ERROR = "adb.error"
+    INPUT_EXECUTED = "input.executed"
     
     # All standard event types
     ALL_STANDARD_TYPES: Set[str] = {

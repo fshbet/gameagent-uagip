@@ -4,21 +4,16 @@ Project:
 UAGIP
 
 Current Phase:
-Phase 2A - Capture Engine
+Phase 2B - Android ADB Capture Adapter
 
 Completed:
-- Phase 1A Config Manager
-- Phase 1B Logging Framework
-- Phase 1C Event Bus
-- Phase 1D Scheduler
-- Phase 1E Health Monitor
+- Core Foundation
+- Capture Engine
 
-Current Milestone:
-Build production-grade capture subsystem.
+Current Goal:
+Android device integration via ADB
 
-Next:
-- Screen Capture
-- ADB Capture
-- Emulator Capture
-- Frame Pipeline
-- Capture Metrics
+Future:
+- Emulator Adapter
+- Vision Engine
+- Learning Engine
