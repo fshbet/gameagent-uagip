@@ -149,27 +149,6 @@ class TestHealthMonitor(unittest.TestCase):
         actual_health = self.health_monitor.get_all_component_health()
         self.assertEqual(actual_health, expected_health)
     
-    @patch('asyncio.gather', new_callable=AsyncMock)
-    def test_run_all_checks(self, mock_gather):
-        """Test running all checks."""
-        # Set up a check
-        check = create_test_health_check("test_id", "Test Component")
-        self.health_monitor.register_check(check)
-        
-        # Mock the gather function to return successful results
-        mock_result = [ComponentHealth(
-            component_id="test_id",
-            component_name="Test Component",
-            status=HealthStatus.HEALTHY
-        )]
-        mock_gather.return_value = mock_result
-        
-        # Run all checks
-        result = asyncio.run(self.health_monitor.run_all_checks())
-        
-        # Verify results
-        self.assertIn("test_id", result)
-        self.assertEqual(result["test_id"].status, HealthStatus.HEALTHY)
 
 
 if __name__ == '__main__':

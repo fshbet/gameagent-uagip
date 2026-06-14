@@ -142,35 +142,6 @@ class HealthMonitor:
             
             return error_health
     
-    async def run_all_checks(self) -> Dict[str, ComponentHealth]:
-        """
-        Run all registered health checks.
-
-        Returns:
-            Dict[str, ComponentHealth]: Dictionary mapping component IDs to their health status
-        """
-        # Create a list of coroutines to run concurrently
-        tasks = [self.run_check(component_id) for component_id in self._checks.keys()]
-
-        # Run all checks concurrently
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Convert results to dictionary
-        result_dict = {}
-        for i, (component_id, result) in enumerate(zip(self._checks.keys(), results)):
-            if isinstance(result, Exception):
-                # Handle exceptions in health checks
-                error_health = ComponentHealth(
-                    component_id=component_id,
-                    component_name=self._checks[component_id].component_name,
-                    status=HealthStatus.UNHEALTHY,
-                    message=str(result)
-                )
-                result_dict[component_id] = error_health
-            else:
-                result_dict[component_id] = result
-
-        return result_dict
     
     def get_system_health(self) -> HealthStatus:
         """
@@ -230,3 +201,38 @@ class HealthMonitor:
             Dict[str, ComponentHealth]: Dictionary mapping component IDs to their health
         """
         return self._component_health.copy()
+
+    async def run_all_checks(self) -> Dict[str, ComponentHealth]:
+        """
+        Run all registered health checks concurrently and return results.
+
+        Returns:
+            Dict[str, ComponentHealth]: Dictionary mapping component IDs to their health results
+        """
+        if not self._checks:
+            return {}
+        
+        # Create tasks for all checks
+        tasks = [
+            self.run_check(component_id)
+            for component_id in self._checks.keys()
+        ]
+        
+        # Run all tasks concurrently using asyncio.gather
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Build result dictionary
+        final_results = {}
+        for i, (component_id, result) in enumerate(zip(self._checks.keys(), results)):
+            if isinstance(result, Exception):
+                # Handle exceptions in health checks
+                final_results[component_id] = ComponentHealth(
+                    component_id=component_id,
+                    component_name=self._checks[component_id].component_name,
+                    status=HealthStatus.UNHEALTHY,
+                    message=str(result)
+                )
+            else:
+                final_results[component_id] = result
+        
+        return final_results
